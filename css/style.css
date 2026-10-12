@@ -617,7 +617,8 @@ body.has-sky .hero { isolation: auto; }
 }
 /* Обрезаем саму картинку бамбука кругом. Только скругления луны мало: Safari на iPhone
    не обрезает по скруглению то, что анимируется внутри, — и квадрат с бамбуком торчал за круг */
-.mg__bamboo { inset: 0; width: 100%; height: 100%; color: #060805; clip-path: circle(50% at 50% 50%); }
+.mg__bamboo, .mg__stars { -webkit-clip-path: circle(50% at 50% 50%); clip-path: circle(50% at 50% 50%); }
+.mg__bamboo { inset: 0; width: 100%; height: 100%; color: #060805; }
 /* при наведении на «Заказать» (и при нажатии) половины рощи медленно расходятся в стороны,
    а когда курсор уходит — так же медленно сходятся обратно */
 .mg__bamboo .bb { transform-box: view-box; transform-origin: 50% 100%; transition: transform 1.95s cubic-bezier(.45, 0, .2, 1); }
@@ -626,6 +627,14 @@ body.has-sky .hero { isolation: auto; }
 /* отдельными правилами: браузер без поддержки :has() пропустит только их */
 .mg__moon:has(.mg__order:hover) .bb--l, .mg__moon:has(.mg__order:focus-visible) .bb--l { transform: translateX(-62%) rotate(-7deg); }
 .mg__moon:has(.mg__order:hover) .bb--r, .mg__moon:has(.mg__order:focus-visible) .bb--r { transform: translateX(62%) rotate(7deg); }
+/* Телефоны и планшеты (экран уже 1100 px или нет мыши): бамбук стоит на месте и не расходится —
+   Safari на iPhone выносит движущийся бамбук за край круга, и вокруг луны появлялся квадрат */
+@media (max-width: 1099px), (hover: none) {
+  .mg__bamboo .bb, .is-opening .mg__bamboo .bb--l, .is-opening .mg__bamboo .bb--r { transform: none; transition: none; }
+  /* отдельно: старые iPhone не знают :has() и отбросили бы всё правило целиком */
+  .mg__moon:has(.mg__order:hover) .bb--l, .mg__moon:has(.mg__order:hover) .bb--r,
+  .mg__moon:has(.mg__order:focus-visible) .bb--l, .mg__moon:has(.mg__order:focus-visible) .bb--r { transform: none; }
+}
 .is-opening .mg__order { opacity: 0; transform: scale(.88); transition: opacity .3s, transform .3s; pointer-events: none; }
 
 /* Луна, раскрывающаяся на весь экран (js/moongate.js) */

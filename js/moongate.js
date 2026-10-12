@@ -115,7 +115,9 @@
     const href = order.href;
     // Бамбук уже разошёлся от наведения мыши? Тогда луна начинает расти почти сразу;
     // иначе (касание на телефоне) — когда он заметно раздвинется
-    const parted = order.matches(':hover') || order.matches(':focus-visible');
+    // На телефонах и планшетах бамбук не расходится вовсе (см. css) — ждать нечего
+    const parted = order.matches(':hover') || order.matches(':focus-visible') ||
+      matchMedia('(max-width: 1099px), (hover: none)').matches;
     gate.classList.add('is-opening');
 
     const r = moon.getBoundingClientRect();
