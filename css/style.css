@@ -379,7 +379,7 @@ body.has-sky .hero { isolation: auto; }
   --bar: clamp(7px, 1.2vw, 14px);     /* толщина перекладин */
   position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
   gap: var(--bar); padding: calc(var(--bar) * 1.4);
-  max-width: 980px; margin-inline: auto; aspect-ratio: 16 / 10;
+  margin-inline: auto; aspect-ratio: 16 / 10;
   border-radius: 20px;
   background: linear-gradient(150deg, #4a2214, var(--frame) 55%, #1c0d08);
   box-shadow:
@@ -507,6 +507,19 @@ body.has-sky .hero { isolation: auto; }
 .mg--clean .mg__q:hover .mg__txt { transform: translateY(-2px); }
 .mg--clean .mg__name { font-size: clamp(1.05rem, 2.3vw, 1.75rem); }
 .mg--clean .mg__hint { font-size: .78rem; text-shadow: none; }
+
+/* Компьютер: окно шире колонки текста — занимает свободное место до Будды справа
+   (струя чая идёт посередине правого поля, Будда шириной 120 px стоит на ней; окно кончается за 15 px до него),
+   и чуть выше (3:2). По высоте — не больше 85% экрана. Сдвигаем свойством translate, а не transform,
+   чтобы не мешать анимации появления раздела. */
+@media (min-width: 1100px) {
+  body.has-flow .moongate {
+    width: min(max(100%, calc(50vw + 50% - 150px)), calc(85vh * 1.5));
+    aspect-ratio: 3 / 2; margin-left: 50%; translate: -50% 0;
+  }
+  body.has-flow .mg--clean .mg__name { font-size: clamp(1.5rem, 2.2vw, 2.4rem); }
+  body.has-flow .mg--clean .mg__hint { font-size: .92rem; }
+}
 
 /* --- Деталь: красный лак с золотым меандром (1 и 3) --- */
 .mg--lacquer {
@@ -1414,14 +1427,20 @@ body.has-flow .lantern--2 { display: none; }
   .lang--bar { margin-left: auto; }
 }
 @media (max-width: 600px) {
-  /* На телефоне языки переезжают в выпадающее меню, в строке остаются логотип, корзина и меню */
-  .lang--bar { display: none; }
-  .lang--menu { display: flex; margin-top: 8px; }
-  .cart-btn { margin-left: auto; }
+  /* На телефоне языки остаются в верхней строке слева от корзины, как на компьютере, — только компактнее */
+  .nav { gap: 8px; }
+  .nav__logo { font-size: 1.15rem; }
+  .lang button { padding: 7px 8px; font-size: .7rem; }
+  .cart-btn { width: 40px; height: 40px; }
+  .nav__toggle { width: 40px; }
 }
 @media (max-width: 380px) {
-  .nav__logo { font-size: 1.1rem; }
-  .lang button { padding: 7px 8px; }
+  .nav { gap: 6px; padding-inline: 14px; }
+  .nav__logo { font-size: 1rem; letter-spacing: .04em; }
+  .lang { padding: 2px; }
+  .lang button { padding: 6px 6px; font-size: .66rem; letter-spacing: .03em; }
+  .cart-btn { width: 38px; height: 38px; }
+  .nav__toggle { width: 36px; }
 }
 @media (max-width: 760px) {
   .lantern--1 { left: 2%; --s: .7; }

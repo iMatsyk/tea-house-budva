@@ -82,20 +82,22 @@ const TeaFX = (() => {
             `background-position:${-i * pw}px 0,0 0;background-size:${w}px 100%,auto;transform-origin:${i % 2 ? 'right' : 'left'} center`;
           panels.push({ p, i, side: i % 2 ? -1 : 1 });
         }
-        return { panels, N };
+        // на компьютере створки двигаются быстрее (вся ширма ≈ 0,75 с), на телефоне — как раньше (≈ 1,3 с)
+        const fast = matchMedia('(min-width: 1100px)').matches;
+        return { panels, N, dur: fast ? 460 : 750, step: fast ? 55 : 110 };
       },
       cover(st) {
         return st.panels.map(({ p, i, side }) => play(p, [
           { transform: `perspective(1600px) rotateY(${92 * side}deg)`, filter: 'brightness(.4)' },
           { transform: 'perspective(1600px) rotateY(0deg)', filter: 'brightness(1)' },
-        ], { duration: 750, delay: i * 110 }));
+        ], { duration: st.dur, delay: i * st.step }));
       },
       covered(st) { st.panels.forEach(({ p }) => { p.style.transform = 'perspective(1600px) rotateY(0deg)'; }); },
       uncover(st) {
         return st.panels.map(({ p, i, side }) => play(p, [
           { transform: 'perspective(1600px) rotateY(0deg)', filter: 'brightness(1)' },
           { transform: `perspective(1600px) rotateY(${-92 * side}deg)`, filter: 'brightness(.4)' },
-        ], { duration: 750, delay: (st.N - 1 - i) * 110, easing: OUT }));
+        ], { duration: st.dur, delay: (st.N - 1 - i) * st.step, easing: OUT }));
       },
     },
 
