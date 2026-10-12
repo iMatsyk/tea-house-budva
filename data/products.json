@@ -1,0 +1,208 @@
+{
+  "whatsapp": "38267120815",
+  "demo": true,
+  "groups": {
+    "tea": {
+      "me": "Čaj", "en": "Tea", "ru": "Чай",
+      "all": { "me": "Sav čaj", "en": "All tea", "ru": "Весь чай" },
+      "img": "img/tea-loose.jpg",
+      "subs": ["green", "black", "oolong", "puer", "white"]
+    },
+    "herbs": {
+      "me": "Bilje", "en": "Herbs", "ru": "Травы",
+      "all": { "me": "Sve bilje", "en": "All herbs", "ru": "Все травы" },
+      "img": "img/herbs-loose.jpg",
+      "subs": ["blend", "single", "fruit"]
+    },
+    "coffee": {
+      "me": "Kafa", "en": "Coffee", "ru": "Кофе",
+      "all": { "me": "Sva kafa", "en": "All coffee", "ru": "Весь кофе" },
+      "img": "img/coffee-beans.jpg",
+      "subs": ["beans", "ground"]
+    },
+    "teaware": {
+      "me": "Pribor", "en": "Teaware", "ru": "Посуда",
+      "all": { "me": "Sav pribor", "en": "All teaware", "ru": "Вся посуда" },
+      "img": "img/teaware-cn.jpg",
+      "subs": ["teapots", "gaiwans", "cups", "accessories"]
+    }
+  },
+  "categories": {
+    "green":       { "me": "Zeleni čaj",           "en": "Green tea",        "ru": "Зелёный чай" },
+    "black":       { "me": "Crni čaj",             "en": "Black tea",        "ru": "Чёрный чай" },
+    "oolong":      { "me": "Ulun",                 "en": "Oolong",           "ru": "Улун" },
+    "puer":        { "me": "Pu-erh",               "en": "Pu-erh",           "ru": "Пуэр" },
+    "white":       { "me": "Bijeli čaj",           "en": "White tea",        "ru": "Белый чай" },
+    "blend":       { "me": "Biljne mješavine",     "en": "Herbal blends",    "ru": "Травяные сборы" },
+    "single":      { "me": "Pojedinačne biljke",   "en": "Single herbs",     "ru": "Монотравы" },
+    "fruit":       { "me": "Voćni čaj i rooibos",  "en": "Fruit & rooibos",  "ru": "Фруктовые и ройбуш" },
+    "beans":       { "me": "Kafa u zrnu",          "en": "Coffee beans",     "ru": "Зерновой кофе" },
+    "ground":      { "me": "Mljevena kafa",        "en": "Ground coffee",    "ru": "Молотый кофе" },
+    "teapots":     { "me": "Čajnici",              "en": "Teapots",          "ru": "Чайники" },
+    "gaiwans":     { "me": "Gaivani",              "en": "Gaiwans",          "ru": "Гайвани" },
+    "cups":        { "me": "Šoljice",              "en": "Cups",             "ru": "Пиалы" },
+    "accessories": { "me": "Dodaci",               "en": "Accessories",      "ru": "Аксессуары" }
+  },
+  "products": [
+    {
+      "id": "assam", "cat": "black", "img": "img/jars.jpg",
+      "unit": "g", "price": 6, "weights": [50, 100, 250],
+      "name": { "me": "Assam", "en": "Assam", "ru": "Ассам" },
+      "desc": {
+        "me": "Jak indijski crni čaj sa notama slada — odličan uz mlijeko.",
+        "en": "Strong Indian black tea with malty notes — great with milk.",
+        "ru": "Крепкий индийский чёрный чай с солодовыми нотами — хорош с молоком."
+      }
+    },
+    {
+      "id": "darjeeling", "cat": "black", "img": "img/g-bags.jpg",
+      "unit": "g", "price": 9, "weights": [50, 100, 250],
+      "name": { "me": "Darjeeling", "en": "Darjeeling", "ru": "Дарджилинг" },
+      "desc": {
+        "me": "Lagan, cvjetan crni čaj sa podnožja Himalaja.",
+        "en": "Light, floral black tea from the Himalayan foothills.",
+        "ru": "Лёгкий цветочный чёрный чай из предгорий Гималаев."
+      }
+    },
+    {
+      "id": "sencha", "cat": "green", "img": null,
+      "unit": "g", "price": 8, "weights": [50, 100, 250],
+      "name": { "me": "Sencha", "en": "Sencha", "ru": "Сенча" },
+      "desc": {
+        "me": "Japanski zeleni čaj svježeg, travnatog ukusa.",
+        "en": "Japanese green tea with a fresh, grassy taste.",
+        "ru": "Японский зелёный чай со свежим травянистым вкусом."
+      }
+    },
+    {
+      "id": "jasmine", "cat": "green", "img": null,
+      "unit": "g", "price": 7, "weights": [50, 100, 250],
+      "name": { "me": "Zeleni čaj sa jasminom", "en": "Jasmine green tea", "ru": "Зелёный чай с жасмином" },
+      "desc": {
+        "me": "Zeleni čaj aromatizovan cvjetovima jasmina.",
+        "en": "Green tea scented with jasmine blossoms.",
+        "ru": "Зелёный чай, ароматизированный цветками жасмина."
+      }
+    },
+    {
+      "id": "tieguanyin", "cat": "oolong", "img": null,
+      "unit": "g", "price": 12, "weights": [50, 100],
+      "name": { "me": "Tie Guan Yin", "en": "Tie Guan Yin", "ru": "Те Гуань Инь" },
+      "desc": {
+        "me": "Cvjetni ulun iz provincije Fuđen, može se zalivati više puta.",
+        "en": "Floral oolong from Fujian that can be infused many times.",
+        "ru": "Цветочный улун из провинции Фуцзянь, выдерживает много проливов."
+      }
+    },
+    {
+      "id": "shou-puer", "cat": "puer", "img": "img/puer.jpg",
+      "unit": "pc", "price": 25,
+      "name": { "me": "Šu pu-erh, pogača 357 g", "en": "Shou pu-erh cake, 357 g", "ru": "Шу пуэр, блин 357 г" },
+      "desc": {
+        "me": "Tamni, zemljani pu-erh — presovana pogača za dugo uživanje.",
+        "en": "Dark, earthy pu-erh — a pressed cake that lasts a long time.",
+        "ru": "Тёмный землистый пуэр — прессованный блин надолго."
+      }
+    },
+    {
+      "id": "bai-mu-dan", "cat": "white", "img": null,
+      "unit": "g", "price": 11, "weights": [50, 100],
+      "name": { "me": "Bai Mu Dan", "en": "Bai Mu Dan", "ru": "Бай Му Дань" },
+      "desc": {
+        "me": "Nježan bijeli čaj sa medenim notama.",
+        "en": "Delicate white tea with honey notes.",
+        "ru": "Нежный белый чай с медовыми нотами."
+      }
+    },
+    {
+      "id": "herbal-blend", "cat": "blend", "img": "img/herbs.jpg",
+      "unit": "pc", "price": 7,
+      "name": { "me": "Organska biljna mješavina", "en": "Organic herbal blend", "ru": "Органический травяной сбор" },
+      "desc": {
+        "me": "Biljni čaj lokalnih proizvođača iz Crne Gore.",
+        "en": "Herbal tea from local Montenegrin producers.",
+        "ru": "Травяной чай местных черногорских производителей."
+      }
+    },
+    {
+      "id": "chamomile", "cat": "single", "img": null,
+      "unit": "g", "price": 4, "weights": [50, 100],
+      "name": { "me": "Kamilica", "en": "Chamomile", "ru": "Ромашка" },
+      "desc": {
+        "me": "Cvjetovi kamilice za miran večernji čaj.",
+        "en": "Chamomile flowers for a calm evening cup.",
+        "ru": "Цветки ромашки для спокойного вечернего чаепития."
+      }
+    },
+    {
+      "id": "rooibos", "cat": "fruit", "img": null,
+      "unit": "g", "price": 5, "weights": [50, 100, 250],
+      "name": { "me": "Rooibos sa narandžom", "en": "Orange rooibos", "ru": "Ройбуш с апельсином" },
+      "desc": {
+        "me": "Afrički rooibos bez kofeina sa korom narandže.",
+        "en": "Caffeine-free African rooibos with orange peel.",
+        "ru": "Африканский ройбуш без кофеина с апельсиновой цедрой."
+      }
+    },
+    {
+      "id": "espresso-beans", "cat": "beans", "img": "img/coffee-beans.jpg",
+      "unit": "g", "price": 3, "weights": [250, 500, 1000],
+      "name": { "me": "Espresso mješavina u zrnu", "en": "Espresso blend, beans", "ru": "Эспрессо-смесь в зёрнах" },
+      "desc": {
+        "me": "Arabika i robusta, tamno prženje sa notama čokolade.",
+        "en": "Arabica and robusta, dark roast with chocolate notes.",
+        "ru": "Арабика и робуста, тёмная обжарка с шоколадными нотами."
+      }
+    },
+    {
+      "id": "ground-arabica", "cat": "ground", "img": null,
+      "unit": "g", "price": 3.5, "weights": [250, 500],
+      "name": { "me": "Mljevena arabika", "en": "Ground arabica", "ru": "Молотая арабика" },
+      "desc": {
+        "me": "Srednje prženje, mljevena za džezvu i filter.",
+        "en": "Medium roast, ground for cezve and filter.",
+        "ru": "Средняя обжарка, помол для турки и фильтра."
+      }
+    },
+    {
+      "id": "clay-teapot", "cat": "teapots", "img": "img/teapots.jpg",
+      "unit": "pc", "price": 35,
+      "name": { "me": "Glineni čajnik", "en": "Clay teapot", "ru": "Глиняный чайник" },
+      "desc": {
+        "me": "Čajnik od gline za ulun i pu-erh.",
+        "en": "A clay teapot for oolong and pu-erh.",
+        "ru": "Глиняный чайник для улунов и пуэров."
+      }
+    },
+    {
+      "id": "gaiwan", "cat": "gaiwans", "img": "img/g-gaiwan.jpg",
+      "unit": "pc", "price": 18,
+      "name": { "me": "Porculanski gaivan", "en": "Porcelain gaiwan", "ru": "Фарфоровый гайвань" },
+      "desc": {
+        "me": "Posuda sa poklopcem za kineski način pripreme čaja.",
+        "en": "A lidded bowl for brewing tea the Chinese way.",
+        "ru": "Чашка с крышкой для заваривания чая по-китайски."
+      }
+    },
+    {
+      "id": "tea-cup", "cat": "cups", "img": "img/g-cups.jpg",
+      "unit": "pc", "price": 6,
+      "name": { "me": "Šoljica za čaj", "en": "Tea cup", "ru": "Пиала" },
+      "desc": {
+        "me": "Mala šoljica za degustaciju čaja.",
+        "en": "A small cup for tasting tea.",
+        "ru": "Маленькая пиала для дегустации чая."
+      }
+    },
+    {
+      "id": "strainer", "cat": "accessories", "img": null,
+      "unit": "pc", "price": 4,
+      "name": { "me": "Cjediljka za čaj", "en": "Tea strainer", "ru": "Ситечко для чая" },
+      "desc": {
+        "me": "Fina metalna cjediljka za rinfuzni čaj.",
+        "en": "A fine metal strainer for loose-leaf tea.",
+        "ru": "Мелкое металлическое ситечко для листового чая."
+      }
+    }
+  ]
+}

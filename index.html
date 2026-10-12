@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="cnr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tea House Budva — kuća čaja u Budvi</title>
+  <meta name="description" id="metaDesc" content="Tea House Budva — prodavnica čaja u Budvi: rinfuzni čaj, pu-erh, ulun, pribor za čaj i čajne ceremonije. Mediteranska 65, svaki dan 10:00–20:00.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><ellipse cx='32' cy='34' rx='22' ry='20' fill='%23e3261c'/><rect x='24' y='8' width='16' height='6' rx='2' fill='%23c9a15a'/><rect x='24' y='52' width='16' height='5' rx='2' fill='%23c9a15a'/></svg>">
+</head>
+<body class="has-flow">
+
+  <!-- Навигация -->
+  <header class="nav" id="nav">
+    <a href="#top" class="nav__logo" aria-label="Tea House — početna" data-i18n-attr="aria-label:a.home">TEA HOUSE</a>
+    <nav class="nav__links" id="navLinks">
+      <a href="assortment.html" data-i18n="nav.shop">Asortiman</a>
+      <a href="#about" data-i18n="nav.about">O nama</a>
+      <a href="gallery.html" data-i18n="nav.gallery">Galerija</a>
+      <a href="#visit" data-i18n="nav.contact">Kontakt</a>
+      <a href="tel:+38267120815" class="nav__phone">+382 67 120 815</a>
+      <div class="lang lang--menu" role="group" aria-label="Jezik · Language · Язык">
+        <button type="button" data-lang="me" title="Crnogorski">MNE</button>
+        <button type="button" data-lang="en" title="English">EN</button>
+        <button type="button" data-lang="ru" title="Русский">RU</button>
+      </div>
+    </nav>
+    <div class="lang lang--bar" role="group" aria-label="Jezik · Language · Язык">
+      <button type="button" data-lang="me" title="Crnogorski">MNE</button>
+      <button type="button" data-lang="en" title="English">EN</button>
+      <button type="button" data-lang="ru" title="Русский">RU</button>
+    </div>
+    <button type="button" class="cart-btn" data-cart-open aria-label="Korpa" data-i18n-attr="aria-label:a.cart">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8h13l-1.2 12H6.7L5.5 8Zm3.5 0V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      <span class="cart-btn__count" hidden>0</span>
+    </button>
+    <button class="nav__toggle" id="navToggle" aria-label="Meni" data-i18n-attr="aria-label:a.menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <!-- Главный экран -->
+  <section class="hero" id="top">
+    <div class="hero__bg" aria-hidden="true"></div>
+
+    <div class="lanterns" aria-hidden="true">
+      <div class="lantern lantern--1"><i class="lantern__cord"></i><i class="lantern__cap"></i><i class="lantern__body"></i><i class="lantern__cap lantern__cap--bottom"></i><i class="lantern__tassel"></i></div>
+      <div class="lantern lantern--2"><i class="lantern__cord"></i><i class="lantern__cap"></i><i class="lantern__body"></i><i class="lantern__cap lantern__cap--bottom"></i><i class="lantern__tassel"></i></div>
+      <div class="lantern lantern--3"><i class="lantern__cord"></i><i class="lantern__cap"></i><i class="lantern__body"></i><i class="lantern__cap lantern__cap--bottom"></i><i class="lantern__tassel"></i></div>
+    </div>
+
+    <div class="hero__content">
+      <p class="hero__eyebrow" data-i18n="hero.eyebrow">Budva · Crna Gora</p>
+      <h1 class="neon" data-text="TEA HOUSE"><span>TEA HOUSE</span></h1>
+      <p class="hero__lead" data-i18n="hero.lead">Kuća čaja u centru Budve: rinfuzni čaj, pu-erh i ulun, pribor za čaj i čajne ceremonije</p>
+      <!-- Статус работы — заодно кнопка «Как нас найти»: ведёт к адресу и карте -->
+      <a href="#visit" class="status" id="status" title="Kako do nas" data-i18n-attr="title:hero.btn2">
+        <span class="status__dot"></span>
+        <span id="statusText">Svaki dan 10:00–20:00</span>
+        <svg class="status__pin" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.6" fill="currentColor"/></svg>
+      </a>
+      <div class="hero__actions">
+        <a href="#assortment" class="btn btn--red" data-i18n="hero.btn1">Pogledajte asortiman</a>
+      </div>
+    </div>
+
+    <a href="#assortment" class="hero__scroll" aria-label="Listajte dolje" data-i18n-attr="aria-label:a.scroll"><span></span></a>
+  </section>
+
+  <!-- Ассортимент -->
+  <section class="section section--dark" id="assortment">
+    <div class="container">
+      <div class="section__head">
+        <p class="kicker kicker--neon" data-i18n="as.kicker">Asortiman</p>
+        <h2 data-i18n="as.title">Šta vas čeka na policama</h2>
+      </div>
+      <!-- Лунные ворота: китайское окно из 4 равных отсеков-категорий,
+           в центре круглый проём с луной и кнопкой «Заказать».
+           Каждый отсек ведёт на страницу ассортимента сразу в нужную категорию (?cat=…).
+           Фото в отсеках — украшение (alt=""), смысл несут подписи. -->
+      <div class="moongate">
+        <!-- Фото в отсеках — Unsplash (лицензия Unsplash, бесплатно для коммерческого использования):
+             чай — Invisible, травы — Neringa Normantaite, кофе — Anastasiia Chepinska, посуда — Didi Paul -->
+        <a class="mg__q mg__q--tl" href="assortment.html?cat=tea#catalog">
+          <img src="img/tea-loose.jpg" alt="" loading="lazy">
+          <span class="mg__txt"><span class="mg__name" data-i18n="mg.tea">Čaj</span><span class="mg__hint" data-i18n="mg.tea.h">Zeleni · crni · ulun · pu-erh</span></span>
+        </a>
+        <a class="mg__q mg__q--tr" href="assortment.html?cat=herbs#catalog">
+          <img src="img/herbs-loose.jpg" alt="" loading="lazy">
+          <span class="mg__txt"><span class="mg__name" data-i18n="mg.herbs">Bilje</span><span class="mg__hint" data-i18n="mg.herbs.h">Mješavine i pojedinačne biljke</span></span>
+        </a>
+        <a class="mg__q mg__q--bl" href="assortment.html?cat=coffee#catalog">
+          <img src="img/coffee-beans.jpg" alt="" loading="lazy">
+          <span class="mg__txt"><span class="mg__name" data-i18n="mg.coffee">Kafa</span><span class="mg__hint" data-i18n="mg.coffee.h">U zrnu i mljevena</span></span>
+        </a>
+        <a class="mg__q mg__q--br" href="assortment.html?cat=teaware#catalog">
+          <img src="img/teaware-cn.jpg" alt="" loading="lazy">
+          <span class="mg__txt"><span class="mg__name" data-i18n="mg.teaware">Pribor</span><span class="mg__hint" data-i18n="mg.teaware.h">Čajnici · gaivani · šoljice</span></span>
+        </a>
+        <div class="mg__moon">
+          <span class="mg__stars" aria-hidden="true"></span>
+          <span class="mg__disc" aria-hidden="true"></span>
+          <span class="mg__cloud" aria-hidden="true"></span>
+          <!-- ветка цветущей сливы, заходит в проём сверху слева -->
+          <svg class="mg__branch" viewBox="0 0 200 130" aria-hidden="true">
+            <g fill="none" stroke="#1a0f0b" stroke-linecap="round">
+              <path d="M-6 16 C 30 22 60 34 92 52 S 150 86 182 92" stroke-width="5"/>
+              <path d="M62 36 C 70 22 82 14 98 10" stroke-width="3"/>
+              <path d="M120 66 C 126 80 124 96 116 110" stroke-width="2.6"/>
+              <path d="M150 82 C 160 74 172 70 186 70" stroke-width="2.2"/>
+            </g>
+            <g class="mg__blossoms">
+              <circle cx="98" cy="10" r="6"/><circle cx="80" cy="18" r="5"/><circle cx="92" cy="52" r="6.5"/>
+              <circle cx="116" cy="110" r="5.5"/><circle cx="124" cy="88" r="4.5"/><circle cx="186" cy="70" r="5"/>
+              <circle cx="160" cy="88" r="6"/><circle cx="40" cy="25" r="4.5"/>
+            </g>
+          </svg>
+          <a href="assortment.html#catalog" class="btn btn--red mg__order" data-i18n="as.cta">Naručite</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- О нас -->
+  <section class="section section--paper" id="about">
+    <div class="container about">
+      <div class="about__media">
+        <img src="img/dragon.jpg" alt="Sala Tea House sa zmajem naslikanim na zidu i policama sa priborom" data-i18n-attr="alt:alt.dragon" loading="lazy">
+        <img src="img/storefront.jpg" class="about__media-small" alt="Izlog Tea House sa neonskim natpisom i crvenim lampionima" data-i18n-attr="alt:alt.storefront" loading="lazy">
+      </div>
+      <div class="about__text">
+        <p class="kicker" data-i18n="about.kicker">O nama</p>
+        <h2 data-i18n="about.title">Mjesto gdje se čaj pije polako</h2>
+        <p data-i18n="about.p1">Tea House je ugodna prodavnica čaja u Mediteranskoj ulici. Na policama su desetine vrsta rinfuznog čaja: od klasičnih crnih i zelenih do odležalih pu-erha, uluna i biljnih mješavina.</p>
+        <p data-i18n="about.p2">Naši savjetnici pomoći će vam da izaberete čaj po svom ukusu, daće vam da ga pomirišete i objasniće kako da ga pripremite. Imamo i kafu u zrnu, matchu i sve za pripremu čaja — od gaivana do glinenih čajnika.</p>
+        <ul class="facts">
+          <!-- Ссылка открывает Google Карты сразу на вкладке «Отзывы» -->
+          <li class="facts__item--link">
+            <a class="facts__link" href="https://www.google.com/maps/place/Tea+House+Budva/@42.2852147,18.8394987,17z/data=!4m8!3m7!1s0x134dd49a690483ed:0xcd9089c159ed89aa!8m2!3d42.2852147!4d18.8394987!9m1!1b1!16s%2Fg%2F11g8n7wfmq" target="_blank" rel="noopener">
+              <strong>100+</strong><span data-i18n="about.f2">recenzija gostiju</span>
+              <span class="facts__go" data-i18n="about.f2go">Pročitajte na Google-u ↗</span>
+            </a>
+          </li>
+          <li><strong class="facts__hours">10:00–20:00</strong><span data-i18n="about.f3">otvoreno svaki dan</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Загляните внутрь: одно фото входа, ведёт на страницу со всеми фото -->
+  <section class="section section--paper section--joined" id="gallery">
+    <div class="container">
+      <div class="section__head">
+        <h2 data-i18n="g.title">Zavirite unutra</h2>
+      </div>
+      <a href="gallery.html" class="teaser">
+        <img src="img/entrance.jpg" alt="Ulaz u Tea House sa neonskim natpisom" data-i18n-attr="alt:alt.entrance" loading="lazy">
+        <span class="teaser__label"><span data-i18n="g.more">Pogledajte sve fotografije</span> <span aria-hidden="true">→</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Контакты -->
+  <section class="section section--dark" id="visit">
+    <div class="container visit">
+      <div class="visit__info">
+        <p class="kicker kicker--neon" data-i18n="v.kicker">Kontakt</p>
+        <h2 data-i18n="v.title">Dođite na čaj</h2>
+        <dl class="info">
+          <div><dt data-i18n="v.addr">Adresa</dt><dd data-i18n="v.addrv">Mediteranska 65, Budva 85310, Crna Gora</dd></div>
+          <div><dt data-i18n="v.hours">Radno vrijeme</dt><dd data-i18n="v.hoursv">Svaki dan 10:00–20:00</dd></div>
+          <div><dt data-i18n="v.phone">Telefon</dt><dd><a href="tel:+38267120815">+382 67 120 815</a></dd></div>
+        </dl>
+        <div class="hero__actions hero__actions--left">
+          <a class="btn btn--red" href="https://www.google.com/maps/dir/?api=1&destination=Tea+House+Budva+Mediteranska+65" target="_blank" rel="noopener" data-i18n="v.route">Isplanirajte rutu</a>
+          <a class="btn btn--ghost" href="https://www.google.com/maps/place/Tea+House+Budva/@42.2852147,18.8394987,17z/data=!4m8!3m7!1s0x134dd49a690483ed:0xcd9089c159ed89aa!8m2!3d42.2852147!4d18.8394987!9m1!1b1!16s%2Fg%2F11g8n7wfmq" target="_blank" rel="noopener" data-i18n="v.reviews">Recenzije na Google-u</a>
+        </div>
+      </div>
+      <div class="visit__map">
+        <iframe title="Tea House Budva na mapi" data-i18n-attr="title:v.map" src="https://maps.google.com/maps?q=Tea%20House%20Budva%2C%20Mediteranska%2065&z=17&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span class="footer__logo">TEA HOUSE</span>
+    <span>Mediteranska 65, Budva · <a href="tel:+38267120815">+382 67 120 815</a></span>
+    <span>© <span id="year">2026</span> Tea House Budva</span>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/sections.js"></script>
+  <script src="js/lanterns.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/fx-art.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/moongate.js"></script>
+  <script src="js/flow.js"></script>
+</body>
+</html>
