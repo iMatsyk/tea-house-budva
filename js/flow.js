@@ -9,15 +9,32 @@
 //   «Контакты», вверху          — обтекает горячий камень с паром и темнеет до цвета улуна;
 //   «Контакты», внизу           — пруд с карпом кои.
 // Компьютер: струя идёт по правому полю. Телефон и планшет: тонкая струя у края,
-// сцены — в паузах между блоками (.flow-stage).
+// сцены — в паузах между блоками (.flow-stage); Будда — в правом верхнем углу «Ассортимента».
+//
+// Как струя на телефоне и планшете переходит от одной сцены к другой — 6 вариантов
+// (на компьютере струя одна, как была). Для сравнения: ?flow=1 … ?flow=6 (см. .claude/flow.html).
+//   Бамбук переводит русло (если следующая сцена не ровно под предыдущей):
+//   1 — жёлоб: длинный расколотый ствол бамбука, чай бежит по нему и срывается с края;
+//   2 — лесенка: короткие колена ступеньками, чай перескакивает с одного на другое;
+//   3 — труба: чай уходит в бамбуковую чашку и выливается из носика трубы;
+//   4 — отбойники: тонкие палочки, струя скользит по ним и летит дальше дугой;
+//   Перспектива — чай льётся ровной вертикалью, сцены стоят прямо на ней:
+//   5 — «сквозь»: струя уходит за фото, карточки и кнопки и проходит перед текстом, за Буддой;
+//   6 — «глубина»: струя идёт перед фото (на них падает тень) и за строками текста.
 (() => {
   const hero = document.querySelector('.hero');
   if (!hero) return;
+
+  const FLOW = 1; // ← выбранный вариант для телефона
+  const askedFlow = +new URLSearchParams(location.search).get('flow');
+  const VAR = [1, 2, 3, 4, 5, 6].includes(askedFlow) ? askedFlow : FLOW;
+  const PERSP = VAR >= 5;
 
   const NS = 'http://www.w3.org/2000/svg';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const ease = t => t * t * (3 - 2 * t);
+  const r1 = v => Math.round(v * 10) / 10;
   const TILT = 30;   // наклон чайника, градусы
   const FILL = 240;   // сколько «прокрутки» уходит на наполнение пиалы
   const SHISHI = 170; // ...и на наполнение трубки сисиодоси
@@ -32,12 +49,11 @@
   const layer = mk('svg', { id: 'flow', 'aria-hidden': 'true', focusable: 'false' });
   document.body.appendChild(layer);
 
-  // Пустые места-паузы для сцен. Видны только на телефоне и планшете (см. .flow-stage в style.css).
-  // Пиале пауза не нужна: она стоит внизу первого экрана, там и так есть место.
-  [['buddha', '#assortment .moongate', 'after'],       // «Ассортимент», под «лунными воротами»
-   ['cha', '#assortment', 'end'],                      // «Ассортимент», внизу
+  // Места-паузы для сцен. Видны только на телефоне и планшете (см. .flow-stage в style.css),
+  // высоту каждой задаёт скрипт — ровно под сцену и бамбук, без лишней пустоты.
+  // Пиале и Будде паузы не нужны: пиала стоит внизу первого экрана, Будда — в углу над заголовком.
+  [['cha', '#assortment', 'end'],                      // «Ассортимент», внизу — знак 茶
    ['shishi', '#about', 'end'],                        // «О нас»
-   ['bamboo', '#gallery .section__head', 'after'],     // «Загляните внутрь», вверху
    ['stone', '#visit', 'start'],                       // «Контакты», вверху
    ['pond', '#visit', 'end']                           // «Контакты», внизу
   ].forEach(([id, sel, where]) => {
@@ -58,9 +74,17 @@
   // ---------- построение картинки под текущий размер экрана ----------
   function build() {
     const W = document.documentElement.clientWidth;
+    // Раскладку определяем тем же правилом, что и стили (ширина окна вместе с полосой прокрутки),
+    // иначе на экранах 1100–1115 px скрипт и стили «видели» бы разные раскладки
+    const desktop = matchMedia('(min-width: 1100px)').matches;
+    // Телефон: сначала даём паузам-сценам нужную высоту, потом всё меряем
+    const M = desktop ? null : plan(W);
+    if (M) for (const id in M.h) {
+      const st = document.querySelector(`.flow-stage[data-scene="${id}"]`);
+      if (st) st.style.height = Math.round(M.h[id]) + 'px';
+    }
     layer.style.height = '0px';
     const H = document.documentElement.scrollHeight;
-    const vh = innerHeight;
     layer.setAttribute('viewBox', `0 0 ${W} ${H}`);
     layer.setAttribute('width', W);
     layer.setAttribute('height', H);
@@ -68,9 +92,6 @@
     layer.style.height = H + 'px';
     layer.replaceChildren();
 
-    // Раскладку определяем тем же правилом, что и стили (ширина окна вместе с полосой прокрутки),
-    // иначе на экранах 1100–1115 px скрипт и стили «видели» бы разные раскладки
-    const desktop = matchMedia('(min-width: 1100px)').matches;
     const box = sel => {
       const r = document.querySelector(sel).getBoundingClientRect();
       return { top: r.top + scrollY, bottom: r.bottom + scrollY, h: r.height };
@@ -83,8 +104,7 @@
 
     // --- общие заготовки: цвет чая, «шторка» проявления струи ---
     const defs = mk('defs', {}, layer);
-    const stoneY = Math.round(visit.top + visit.h * 0.3);
-    const tea = mk('linearGradient', { id: 'teaGrad', gradientUnits: 'userSpaceOnUse', x1: 0, y1: stoneY, x2: 0, y2: stoneY + 90 }, defs);
+    const tea = mk('linearGradient', { id: 'teaGrad', gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2: 0, y2: 90 }, defs);
     mk('stop', { offset: 0, 'stop-color': '#93bb3b' }, tea);   // зелёный чай
     mk('stop', { offset: 1, 'stop-color': '#d0902a' }, tea);   // после горячего камня — цвет улуна
     const revealClip = mk('clipPath', { id: 'flowReveal' }, defs);
@@ -93,9 +113,11 @@
 
     const back = mk('g', {}, layer);                                         // сцены под струёй
     const liquid = mk('g', { 'clip-path': 'url(#flowReveal)' }, layer);     // всё жидкое
+    const shadows = mk('g', {}, liquid);                                     // тени струи на фото (вариант 6)
     const front = mk('g', {}, layer);                                        // то, что поверх струи
 
-    const mains = []; // участки основной струи — по ним ставим каплю на конце
+    const mains = [];  // участки основной струи — по ним ставим каплю на конце
+    const hidden = []; // высоты, где струя спрятана (внутри бамбуковой трубы) — капли там не видно
     function stream(d, kind = 'smooth', width = sw, parent = liquid, main = true) {
       const g = mk('g', {}, parent);
       let p;
@@ -115,11 +137,13 @@
     }
 
     // --- чайник: рядом с неоновой надписью TEA HOUSE ---
-    // Компьютер: справа от надписи, на одной высоте с ней. Телефон: над надписью, у правого края.
+    // Компьютер: справа от надписи, на одной высоте с ней. Телефон: над надписью, у правого края
+    // (в вариантах с перспективой — прямо над пиалой).
+    const fallX = desktop ? X : M.fallX; // куда падает струя из носика
     const th = TILT * Math.PI / 180, lx = 86, ly = -25; // кончик носика в координатах чайника
     const rx = lx * Math.cos(th) - ly * Math.sin(th);
     const ry = lx * Math.sin(th) + ly * Math.cos(th);
-    const tipX = desktop ? X - 14 : X - 6;
+    const tipX = desktop ? X - 14 : fallX - 6;
     const neonBox = box('.hero .neon');
     const neonRight = document.querySelector('.hero .neon').getBoundingClientRect().right;
     const eyebrowBox = box('.hero__eyebrow');
@@ -137,92 +161,191 @@
 
     const scenes = {};
     const dwells = []; // места, где струя ждёт, пока что-то наполнится
-    let bowl = null, shishi = null, pond = null;
-
-    // Где стоят сцены. Компьютер: по центру правого поля, на нужной высоте раздела.
-    // Телефон: в специальных паузах между блоками (.flow-stage), чуть левее края.
-    const SX = desktop ? X : W - 82;
-    const heroBox = box('.hero');
-    const stageTop = id => box(`.flow-stage[data-scene="${id}"]`).top;
-    const gTop = Math.round(heroBox.bottom - 130);                                                  // пиала — внизу первого экрана
-    const by = desktop ? Math.round(assort.top + assort.h * 0.4) : stageTop('buddha') + 40;      // Будда — «Ассортимент», рядом с окном
-    const cTop = desktop ? Math.round(assort.bottom - 230) : stageTop('cha') + 30;               // 茶 — «Ассортимент», в самом низу
-    const sY = desktop ? Math.round(about.top + about.h * 0.5) : stageTop('shishi') + 50;        // сисиодоси — «О нас»
-    const y0 = desktop ? Math.round(gallery.top + 40) : stageTop('bamboo') + 40;                // бамбук — «Загляните внутрь», вверху
-    const stoneC = desktop ? Math.round(visit.top + visit.h * 0.22) : stageTop('stone') + 60;    // камень — «Контакты», вверху
-    const pY = desktop ? Math.round(visit.bottom - 70) : stageTop('pond') + 40;                  // пруд — «Контакты», внизу
-    tea.setAttribute('y1', stoneC);
-    tea.setAttribute('y2', stoneC + 90);
-
-    // Отрезок струи между сценами. На телефоне, если сцены далеко друг от друга,
-    // струя уходит к краю экрана (мимо текста) и возвращается к следующей сцене.
-    function link(x1, y1, x2, y2, kind = 'smooth') {
-      let d;
-      if (desktop || y2 - y1 < 150) {
-        const m = (y1 + y2) / 2;
-        d = x1 === x2 ? `M ${x1} ${y1} L ${x2} ${y2}` : `M ${x1} ${y1} C ${x1} ${m} ${x2} ${m} ${x2} ${y2}`;
-      } else {
-        d = `M ${x1} ${y1} C ${x1} ${y1 + 30} ${X} ${y1 + 22} ${X} ${y1 + 60} L ${X} ${y2 - 60} C ${X} ${y2 - 22} ${x2} ${y2 - 30} ${x2} ${y2}`;
-      }
-      stream(d, kind);
-    }
+    let bowl = null, shishi = null, pond = null, end = 0, stoneTop = 0;
 
     // 0. Из носика чайника
     const fall = desktop ? 64 : 40;
-    stream(`M ${tipX} ${spoutY} C ${tipX + (desktop ? 6 : 3)} ${spoutY + 4} ${X} ${spoutY + fall * 0.4} ${X} ${spoutY + fall}`);
+    stream(`M ${tipX} ${spoutY} C ${tipX + (desktop ? 6 : 3)} ${spoutY + 4} ${fallX} ${spoutY + fall * 0.4} ${fallX} ${spoutY + fall}`);
 
-    // 1. Пиала (внизу первого экрана): наполняется, потом переливается через край
-    const gBot = gTop + 70; // капля с ножки пиалы
-    link(X, spoutY + fall, SX, gTop);
-    stream(`M ${SX} ${gTop} L ${SX} ${gTop + 17}`);
-    dwells.push({ y: gTop + 17, span: FILL, t: 0 });
-    bowl = drawBowl(back, front, SX - 55, gTop, defs, stream);
+    if (desktop) {
+      // ===== Компьютер: сцены по центру правого поля, на нужной высоте раздела =====
+      const SX = X;
+      const gTop = Math.round(box('.hero').bottom - 130);         // пиала — внизу первого экрана
+      const by = Math.round(assort.top + assort.h * 0.4);         // Будда — «Ассортимент», рядом с окном
+      const cTop = Math.round(assort.bottom - 230);               // 茶 — «Ассортимент», в самом низу
+      const sY = Math.round(about.top + about.h * 0.5);           // сисиодоси — «О нас»
+      const y0 = Math.round(gallery.top + 40);                    // бамбук — «Загляните внутрь», вверху
+      const stoneC = Math.round(visit.top + visit.h * 0.22);      // камень — «Контакты», вверху
+      const pY = Math.round(visit.bottom - 70);                   // пруд — «Контакты», внизу
+      stoneTop = stoneC;
 
-    // 2. Падающие капли — из пиалы на Будду.
-    // На телефоне и планшете капли бегут вдоль правого края экрана, мимо «лунных ворот».
-    const BX = SX;
-    const headY = by + 9;
-    link(SX, gBot, SX, headY, 'drops');
+      const link = (x1, y1, x2, y2, kind = 'smooth') => {
+        const m = (y1 + y2) / 2;
+        stream(x1 === x2 ? `M ${x1} ${y1} L ${x2} ${y2}` : `M ${x1} ${y1} C ${x1} ${m} ${x2} ${m} ${x2} ${y2}`, kind);
+      };
 
-    // 3. Будда («Ассортимент»)
-    drawBuddha(back, BX - 60, by);
-    const bl = mk('g', { transform: `translate(${BX - 60} ${by})` }, liquid);
-    stream('M 60 9 C 54 10 51 14 50 18 C 47 24 45 30 46 38 C 44 46 34 48 28 58 C 22 70 22 86 26 100 C 28 108 22 112 20 118', 'smooth', 2.4, bl, false);
-    stream('M 60 9 C 66 10 69 14 70 18 C 73 24 75 30 74 38 C 76 46 86 48 92 58 C 98 70 98 86 94 100 C 92 108 98 112 100 118', 'smooth', 2.4, bl, false);
-    mk('ellipse', { cx: 60, cy: 119, rx: 36, ry: 3, class: 'flow-pool' }, bl);
-    scenes.buddha = { el: drawSplash(front, BX, headY), y: headY };
+      // 1. Пиала (внизу первого экрана): наполняется, потом переливается через край
+      link(X, spoutY + fall, SX, gTop);
+      stream(`M ${SX} ${gTop} L ${SX} ${gTop + 17}`);
+      dwells.push({ y: gTop + 17, span: FILL, t: 0 });
+      bowl = drawBowl(back, front, SX - 55, gTop, defs, stream);
 
-    // 4. Иероглиф 茶 («Ассортимент», внизу)
-    link(BX, by + 128, SX, cTop + 22);
-    const cg = mk('g', { transform: `translate(${SX - 55} ${cTop})` }, liquid);
-    CHA.forEach(d => {
-      mk('path', { d, class: 'flow-brush-edge' }, cg);
-      mk('path', { d, class: 'flow-brush' }, cg);
-    });
+      // 2. Падающие капли — из пиалы на Будду
+      const BX = SX, headY = by + 9;
+      link(SX, gTop + 70, SX, headY, 'drops');
 
-    // 5. Сисиодоси («О нас»): трубка наполняется, опрокидывается и дальше качается сама
-    const mouthY = sY - 11;
-    link(SX + 1, cTop + 112, SX - 32, mouthY);
-    dwells.push({ y: mouthY, span: SHISHI, t: 0 });
-    shishi = drawShishi(back, SX, sY);
+      // 3. Будда («Ассортимент»)
+      drawBuddha(back, BX - 60, by);
+      buddhaRills(BX - 60, by, 1, 2.4);
+      scenes.buddha = { el: drawSplash(front, BX, headY), y: headY };
 
-    // 6. Бамбуковый каскад («Загляните внутрь», вверху) — чай падает порциями из трубки
-    link(SX - 30, sY + 16, SX + 10, y0, 'drops');
-    drawBamboo(back, SX, y0);
-    stream(`M ${SX + 10} ${y0} L ${SX - 45} ${y0 + 24} L ${SX - 45} ${y0 + 60} L ${SX + 45} ${y0 + 84} L ${SX + 45} ${y0 + 120} L ${SX} ${y0 + 140}`, 'smooth', desktop ? 4.5 : 3.5);
+      // 4. Иероглиф 茶 («Ассортимент», внизу)
+      link(BX, by + 128, SX, cTop + 22);
+      drawCha(liquid, SX - 55, cTop);
 
-    // 7. Горячий камень с паром («Контакты», вверху) — дальше чай темнеет до цвета улуна
-    const sTop = stoneC - 17;
-    link(SX, y0 + 140, SX, sTop);
-    drawStone(back, SX, stoneC);
-    stream(`M ${SX} ${sTop} C ${SX - 24} ${sTop} ${SX - 40} ${stoneC - 6} ${SX - 36} ${stoneC + 6} C ${SX - 30} ${stoneC + 18} ${SX - 10} ${stoneC + 21} ${SX} ${stoneC + 23}`, 'smooth', 3, liquid, false);
-    stream(`M ${SX} ${sTop} C ${SX + 24} ${sTop} ${SX + 40} ${stoneC - 6} ${SX + 36} ${stoneC + 6} C ${SX + 30} ${stoneC + 18} ${SX + 10} ${stoneC + 21} ${SX} ${stoneC + 23}`, 'smooth', 3, liquid, false);
-    scenes.stone = { el: drawSteam(front, SX, sTop), y: sTop };
+      // 5. Сисиодоси («О нас»): трубка наполняется, опрокидывается и дальше качается сама
+      const mouthY = sY - 11;
+      link(SX + 1, cTop + 112, SX - 32, mouthY);
+      dwells.push({ y: mouthY, span: SHISHI, t: 0 });
+      shishi = drawShishi(back, SX, sY);
 
-    // 8. Пруд с карпом кои («Контакты», внизу)
-    link(SX, stoneC + 23, SX, pY - 4);
-    pond = drawPond(back, front, SX, pY);
-    const end = pY - 3;
+      // 6. Бамбуковый каскад («Загляните внутрь», вверху) — чай падает порциями из трубки
+      link(SX - 30, sY + 16, SX + 10, y0, 'drops');
+      drawBamboo(back, SX, y0);
+      stream(`M ${SX + 10} ${y0} L ${SX - 45} ${y0 + 24} L ${SX - 45} ${y0 + 60} L ${SX + 45} ${y0 + 84} L ${SX + 45} ${y0 + 120} L ${SX} ${y0 + 140}`, 'smooth', 4.5);
+
+      // 7. Горячий камень с паром («Контакты», вверху) — дальше чай темнеет до цвета улуна
+      const sTop = stoneC - 17;
+      link(SX, y0 + 140, SX, sTop);
+      drawStone(back, SX, stoneC);
+      stoneRills(SX, stoneC, 1, 3);
+      scenes.stone = { el: drawSteam(front, SX, sTop), y: sTop };
+
+      // 8. Пруд с карпом кои («Контакты», внизу)
+      link(SX, stoneC + 23, SX, pY - 4);
+      pond = drawPond(back, front, SX, pY);
+      end = pY - 3;
+    } else {
+      // ===== Телефон и планшет =====
+      const P = PERSP, s = M.s, x = M.x, L = M.L;
+      const stTop = id => box(`.flow-stage[data-scene="${id}"]`).top;
+      const by = Math.round(box('.hero').bottom - 112);     // пиала — внизу первого экрана (верх края)
+      const budTop = Math.round(assort.top + 8);             // Будда — в правом верхнем углу «Ассортимента»
+      const chaS = stTop('cha'), shiS = stTop('shishi'), stoS = stTop('stone'), ponS = stTop('pond');
+      const C = { back, front, liquid, hidden, W };
+
+      // Отвесная струя. В перспективе — с «уходами» за предметы и тенью на фото
+      const behind = VAR === 5 ? [CARDS, false] : VAR === 6 ? [TEXT, true] : null;
+      const near = VAR === 6 ? CARDS.filter(c => c !== '.hero .neon') : null;
+      const inAny = (list, y) => list.some(([a, b]) => y > a && y < b);
+      function vline(xx, y1, y2, kind = 'smooth') {
+        if (y2 - y1 < 1) return;
+        if (!P) { stream(`M ${xx} ${r1(y1)} L ${xx} ${r1(y2)}`, kind); return; }
+        const gaps = spans(xx, behind[0], behind[1]);
+        const close = near ? spans(xx, near) : [];
+        const cuts = [y1, y2];
+        [...gaps, ...close].forEach(([a, b]) => { if (a > y1 && a < y2) cuts.push(a); if (b > y1 && b < y2) cuts.push(b); });
+        cuts.sort((a, b) => a - b);
+        for (let i = 0; i < cuts.length - 1; i++) {
+          const a = cuts[i], b = cuts[i + 1], m = (a + b) / 2;
+          if (b - a < 0.5 || inAny(gaps, m)) continue;     // здесь струя за предметом — не рисуем
+          const isNear = inAny(close, m);
+          if (isNear) mk('path', { d: `M ${xx + 4} ${r1(a)} L ${xx + 4} ${r1(b)}`, class: 'flow-shadow', 'stroke-width': sw + 3 }, shadows);
+          stream(`M ${xx} ${r1(a)} L ${xx} ${r1(b)}`, kind, isNear ? sw * 1.55 : sw);
+        }
+      }
+      // Струя от одной сцены к другой: отвесно вниз из x1; если следующая сцена не ровно под ней —
+      // на высоте devY бамбук переводит чай в x2, и дальше он снова падает отвесно
+      function connect(x1, y1, x2, y2, devY, kind = 'smooth') {
+        if (!M.dev || Math.abs(x2 - x1) < 2) return vline(x2, y1, y2, kind);
+        devY = Math.max(y1, devY);
+        const d = M.dev(x1, devY, x2, C);
+        stream(`M ${x1} ${r1(y1)} L ${x1} ${r1(devY)} ${d.cmds} L ${x2} ${r1(Math.max(y2, d.y))}`, kind);
+      }
+
+      // 1. Пиала: чай из носика наполняет её, она наклоняется вправо и выливает чай через правый край
+      const sb = s.bowl, surf = by + 17 * sb;
+      if (P) vline(M.xin, spoutY + fall, surf);
+      else connect(X, spoutY + fall, M.xin, surf, by - 8 - M.dh(X, M.xin));
+      dwells.push({ y: surf, span: FILL, t: 0 });
+      bowl = drawBowl(back, front, M.bowlX, by, defs, stream, sb);
+      const rimX = M.bowlX + M.rim.x * sb, rimY = by + M.rim.y * sb, pourY = rimY + 16;
+      stream(`M ${r1(rimX)} ${r1(rimY)} C ${r1(rimX + 3)} ${r1(rimY + 0.5)} ${x.col} ${r1(rimY + 5)} ${x.col} ${r1(pourY)}`);
+
+      // 2. Будда — небольшой, в правом верхнем углу «Ассортимента»
+      const sB = s.bud, bX = x.bud - 60 * sB, headY = budTop + 9 * sB, baseY = budTop + 128 * sB;
+      const onHead = VAR !== 5; // в варианте 5 струя проходит за статуэткой
+      if (onHead) {
+        connect(x.col, pourY, x.bud, headY, budTop - 6 - M.dh(x.col, x.bud));
+        drawBuddha(back, bX, budTop, sB);
+        buddhaRills(bX, budTop, sB, 3.4);
+        scenes.buddha = { el: drawSplash(front, x.bud, headY), y: headY };
+      } else {
+        drawBuddha(front, bX, budTop, sB);
+      }
+
+      // 3. Знак 茶 внизу «Ассортимента» — под окном, перед «О нас»
+      const sC = s.cha, cTop = chaS + L.cha.cTop, chaIn = cTop + 22 * sC, chaOut = cTop + 112 * sC;
+      if (P) vline(x.cha, onHead ? baseY : pourY, chaIn);
+      else {
+        connect(x.bud, baseY, X, chaS + L.cha.dev, baseY + 4);
+        connect(X, chaS + L.cha.dev, x.cha, chaIn, chaS + L.cha.dev);
+      }
+      CHA.forEach(d => mk('path', { d, class: 'flow-brush-ghost', transform: `translate(${r1(x.cha - 55 * sC)} ${r1(cTop)}) scale(${sC})` }, back));
+      drawCha(liquid, x.cha - 55 * sC, cTop, sC);
+
+      // 4. Сисиодоси в конце «О нас» (открытым концом вправо, к струе)
+      const sS = s.shi, sY = shiS + L.shi.sY, mouthY = sY - 11 * sS, outX = x.mouth - 2 * sS, outY = sY + 16 * sS;
+      if (P) vline(x.mouth, chaIn, mouthY);
+      else {
+        connect(x.cha, chaOut, X, shiS + L.shi.dev, chaOut + 6);
+        connect(X, shiS + L.shi.dev, x.mouth, mouthY, shiS + L.shi.dev);
+      }
+      dwells.push({ y: mouthY, span: SHISHI, t: 0 });
+      shishi = drawShishi(back, x.mouth - 32 * sS, sY, sS, true);
+
+      // 5. Горячий камень с паром вверху «Контактов» — дальше чай темнеет до цвета улуна
+      const sT = s.stone, stoneC = stoS + L.stone.c, sTop = stoneC - 17 * sT, sBot = stoneC + 23 * sT;
+      stoneTop = stoneC;
+      if (P) vline(x.stone, outY, sTop, 'drops');
+      else {
+        const dropEnd = shiS + L.shi.dropEnd;
+        stream(`M ${r1(outX)} ${r1(outY)} L ${r1(outX)} ${r1(dropEnd)}`, 'drops');
+        connect(outX, dropEnd, X, stoS + L.stone.dev, dropEnd);
+        connect(X, stoS + L.stone.dev, x.stone, sTop, stoS + L.stone.dev);
+      }
+      drawStone(mk('g', { transform: `translate(${x.stone} ${r1(stoneC)}) scale(${sT})` }, back), 0, 0);
+      stoneRills(x.stone, stoneC, sT, 3);
+      scenes.stone = { el: drawSteam(mk('g', { transform: `translate(${x.stone} ${r1(sTop)}) scale(${sT})` }, front), 0, 0), y: sTop };
+
+      // 6. Пруд с карпом кои внизу «Контактов»
+      const sP = s.pond, pY = ponS + L.pond.c, pEnd = pY - 4 * sP;
+      if (P) vline(x.pond, sBot, pEnd);
+      else {
+        connect(x.stone, sBot, X, ponS + L.pond.dev, sBot + 4);
+        connect(X, ponS + L.pond.dev, x.pond, pEnd, ponS + L.pond.dev);
+      }
+      const at = `translate(${x.pond} ${r1(pY)}) scale(${sP})`;
+      pond = drawPond(mk('g', { transform: at }, back), mk('g', { transform: at }, front), 0, 0);
+      end = pY - 3 * sP;
+    }
+
+    tea.setAttribute('y1', r1(stoneTop));
+    tea.setAttribute('y2', r1(stoneTop + 90));
+
+    // Струя Будды и камня: два ручейка вокруг, в координатах сцены (s — масштаб, w — толщина)
+    function buddhaRills(bx, by, s, w) {
+      const bl = mk('g', { transform: `translate(${r1(bx)} ${r1(by)})` + (s !== 1 ? ` scale(${s})` : '') }, liquid);
+      stream('M 60 9 C 54 10 51 14 50 18 C 47 24 45 30 46 38 C 44 46 34 48 28 58 C 22 70 22 86 26 100 C 28 108 22 112 20 118', 'smooth', w, bl, false);
+      stream('M 60 9 C 66 10 69 14 70 18 C 73 24 75 30 74 38 C 76 46 86 48 92 58 C 98 70 98 86 94 100 C 92 108 98 112 100 118', 'smooth', w, bl, false);
+      mk('ellipse', { cx: 60, cy: 119, rx: 36, ry: 3, class: 'flow-pool' }, bl);
+    }
+    function stoneRills(cx, cy, s, w) {
+      const g = mk('g', { transform: `translate(${cx} ${r1(cy)})` + (s !== 1 ? ` scale(${s})` : '') }, liquid);
+      stream('M 0 -17 C -24 -17 -40 -6 -36 6 C -30 18 -10 21 0 23', 'smooth', w, g, false);
+      stream('M 0 -17 C 24 -17 40 -6 36 6 C 30 18 10 21 0 23', 'smooth', w, g, false);
+    }
+
     const D = dwells.reduce((s, d) => s + d.span, 0);
     const vMax = end + D;
 
@@ -233,15 +356,223 @@
     const samples = mains.map(p => {
       const L = p.getTotalLength(), pts = [];
       for (let l = 0; l <= L; l += 6) { const pt = p.getPointAtLength(l); pts.push([pt.x, pt.y]); }
-      return { y0: pts[0][1], y1: pts[pts.length - 1][1], pts };
+      const last = p.getPointAtLength(L);
+      pts.push([last.x, last.y]);
+      return { y0: pts[0][1], y1: last.y, pts };
     });
 
-    S = { W, H, desktop, spoutY, tp, teapot, drop, revealRect, samples, scenes, dwells, bowl, shishi, pond, vMax, end, D };
+    // Куски рисунка с бесконечной анимацией (блики струи, капли, пар, рябь): вдали от экрана
+    // их анимацию ставим на паузу — телефону (особенно iPhone) не приходится перерисовывать всю длинную картинку
+    const cull = [...back.children, ...liquid.children, ...front.children, teapot.g].map(el => {
+      const r = el.getBoundingClientRect();
+      return { el, y0: r.top + scrollY, y1: r.bottom + scrollY, off: false };
+    });
+
+    S = { W, H, desktop, spoutY, tp, teapot, drop, revealRect, samples, hidden, cull, scenes, dwells, bowl, shishi, pond, vMax, end, D };
     if (!vCur) vCur = spoutY;
     vCur = Math.min(vCur, vMax);
+    lastW = W;
+    lastH = document.documentElement.scrollHeight;
   }
 
+  // ---------- раскладка для телефона и планшета ----------
+  // Где по горизонтали стоят сцены, их размеры и высота пауз под них (считается до замеров страницы)
+  function plan(W) {
+    const P = PERSP, k = W >= 600 ? 1.2 : 1, X = W - 8, V = W - Math.round(46 * k);
+    const s = { bowl: 0.8 * k, bud: 0.55 * k, cha: 0.72 * k, shi: 0.8 * k, stone: 0.8 * k, pond: (P ? 0.55 : 0.7) * k };
+    // P: всё на одной вертикали V. Иначе — у правого края, но не ровно друг под другом:
+    // между сценами струя уходит к самому краю (мимо текста и фото), бамбук переводит её туда и обратно
+    const x = P ? { col: V, bud: V, cha: V, mouth: V, stone: V, pond: V }
+      : { col: W - 14, bud: W - Math.round(40 * k), cha: W - Math.round(84 * k), mouth: W - Math.round(70 * k),
+          stone: W - Math.round(60 * k), pond: W - Math.round(84 * k) };
+    const dev = P ? null : DEVICES[VAR];
+    const dh = (a, b) => (!dev || Math.abs(a - b) < 2) ? 0 : dev(a, 0, b, null).y; // высота бамбука
+    // Правый край пиалы после наклона (в её собственных координатах): чай льётся отсюда
+    const a = BOWL_TIP * Math.PI / 180, vx = 107 - 70, vy = 12 - 66;
+    const rim = { x: 70 + vx * Math.cos(a) - vy * Math.sin(a), y: 66 + vx * Math.sin(a) + vy * Math.cos(a) };
+    const bowlX = x.col - 7 - rim.x * s.bowl, xin = bowlX + 55 * s.bowl;
+
+    // Раскладка внутри пауз (по высоте от верха паузы) и сами высоты пауз
+    const L = {}, h = {};
+    let sc = s.cha, din = dh(X, x.cha);
+    L.cha = { dev: 6, cTop: P ? 10 : 6 + din + 4 - 8 * sc };
+    h.cha = P ? L.cha.cTop + 118 * sc + 10 : L.cha.cTop + 112 * sc + 6 + dh(x.cha, X) + 8;
+
+    sc = s.shi; din = dh(X, x.mouth);
+    L.shi = { dev: 6, sY: P ? 12 + 12 * sc : 6 + din + 4 + 12 * sc };
+    L.shi.dropEnd = L.shi.sY + 52 * sc + 2;
+    h.shishi = P ? L.shi.sY + 50 * sc + 8 : L.shi.dropEnd + dh(x.mouth - 2 * sc, X) + 8;
+
+    sc = s.stone; din = dh(X, x.stone);
+    L.stone = { dev: 6, c: P ? 44 + 17 * sc : 6 + din + 6 + 17 * sc };
+    h.stone = P ? L.stone.c + 23 * sc + 10 : L.stone.c + 23 * sc + 4 + dh(x.stone, X) + 8;
+
+    sc = s.pond; din = dh(X, x.pond);
+    L.pond = { dev: 6, c: P ? 12 + 26 * sc : 6 + din + 6 + 26 * sc };
+    h.pond = L.pond.c + 30 * sc + 10;
+
+    return { s, x, X, V, dev, dh, rim, bowlX, xin, fallX: P ? xin : X, L, h };
+  }
+
+  // Участки по высоте, где вертикаль x проходит через элементы sels (для вариантов с перспективой).
+  // lines = true — по отдельным строкам текста, а не по всему блоку
+  function spans(x, sels, lines) {
+    const out = [];
+    document.querySelectorAll(sels.join(',')).forEach(el => {
+      const dy = scrollY - shiftY(el);
+      let rects, rad = 0;
+      if (lines) {
+        const rg = document.createRange();
+        rg.selectNodeContents(el);
+        rects = [...rg.getClientRects()];
+      } else {
+        rects = [el.getBoundingClientRect()];
+        rad = parseFloat(getComputedStyle(el).borderTopRightRadius) || 0;
+      }
+      rects.forEach(r => {
+        if (x < r.left + 1 || x > r.right - 1 || r.height < 2) return;
+        // скруглённые углы: у самого края карточка ниже, чем посередине
+        const d = Math.min(x - r.left, r.right - x), rr = Math.min(rad, r.width / 2, r.height / 2);
+        const inset = d < rr ? rr - Math.sqrt(rr * rr - (rr - d) ** 2) : 0;
+        out.push([r.top + dy + inset, r.bottom + dy - inset]);
+      });
+    });
+    out.sort((a, b) => a[0] - b[0]);
+    const merged = [];
+    for (const s of out) {
+      const last = merged[merged.length - 1];
+      if (last && s[0] <= last[1] + 2) last[1] = Math.max(last[1], s[1]);
+      else merged.push([s[0], s[1]]);
+    }
+    return merged;
+  }
+  // Насколько элемент сейчас сдвинут анимацией появления (.reveal) — меряем его «настоящее» место
+  function shiftY(el) {
+    let dy = 0;
+    for (let a = el; a && a !== document.body; a = a.parentElement) {
+      const t = getComputedStyle(a).transform;
+      if (t && t !== 'none') dy += new DOMMatrixReadOnly(t).m42;
+    }
+    return dy;
+  }
+  // Что струя «обходит» в вариантах с перспективой
+  const CARDS = ['.hero .neon', '#status', '.hero__actions .btn', '.moongate', '.about__media img', '.facts li', '.teaser', '.visit__map', '.visit__info .btn'];
+  const TEXT = ['.hero__eyebrow', '.hero .neon span', '.hero__lead', '.section__head .kicker', '.section__head h2',
+    '.about__text .kicker', '.about__text h2', '.about__text > p', '.visit__info .kicker', '.visit__info h2', '.info dt', '.info dd'];
+
+  // ---------- бамбук, переводящий струю вбок (телефон, варианты 1–4) ----------
+  // Чай падает сверху отвесно в точку (x1, y), бамбук уводит его вбок, и дальше он снова падает отвесно в x2.
+  // Возвращает продолжение пути чая (cmds) и высоту, откуда чай снова падает отвесно (y).
+  // Без c — только считает высоту (для раскладки пауз).
+  const deg = (dx, dy) => Math.atan2(dy, dx) * 180 / Math.PI;
+  const tailRoom = (c, x, dir, want) => Math.max(2, Math.min(want, dir < 0 ? c.W - x - 6 : x - 6));
+  function bPole(g, x1, y1, x2, y2, w, groove = true) {
+    mk('line', { x1: r1(x1), y1: r1(y1), x2: r1(x2), y2: r1(y2), class: 'bd-pole', 'stroke-width': w }, g);
+    if (groove) mk('line', { x1: r1(x1), y1: r1(y1), x2: r1(x2), y2: r1(y2), class: 'bd-groove', 'stroke-width': r1(w * 0.42) }, g);
+    const len = Math.hypot(x2 - x1, y2 - y1), nx = -(y2 - y1) / len * w * 0.62, ny = (x2 - x1) / len * w * 0.62;
+    const n = Math.max(1, Math.round(len / 36));
+    for (let i = 1; i <= n; i++) {
+      const t = i / (n + 1), cx = x1 + (x2 - x1) * t, cy = y1 + (y2 - y1) * t;
+      mk('line', { x1: r1(cx - nx), y1: r1(cy - ny), x2: r1(cx + nx), y2: r1(cy + ny), class: 'bd-node' }, g);
+    }
+  }
+  function bCut(g, x, y, ang, w) { // открытый срез ствола — тёмный овал поперёк
+    mk('ellipse', { cx: r1(x), cy: r1(y), rx: r1(w * 0.24), ry: r1(w * 0.5), class: 'bd-cut', transform: `rotate(${r1(ang)} ${r1(x)} ${r1(y)})` }, g);
+  }
+  function bLeaf(g, x, y, r, s = 0.7) {
+    mk('path', { d: 'M 0 0 c 8 -6 20 -6 26 -2 c -8 4 -18 6 -26 2 Z', class: 'bb-leaf', transform: `translate(${r1(x)} ${r1(y)}) rotate(${r}) scale(${s})` }, g);
+  }
+  const DEVICES = {
+    // 1. Жёлоб: один расколотый ствол на скрещённых палочках; чай бежит по нему и срывается дугой с нижнего края
+    1(x1, y, x2, c) {
+      const dir = Math.sign(x2 - x1), k = 0.3;
+      const tail = c ? tailRoom(c, x1, dir, 12) : 12;
+      const ax = x1 - dir * tail, ay = y + 4;
+      const bx = x2 - dir * 6, by = ay + k * Math.abs(bx - ax);
+      const cmds = `L ${x1} ${r1(ay + k * tail)} L ${r1(bx)} ${r1(by)} C ${r1(bx + dir * 4)} ${r1(by + 1)} ${x2} ${r1(by + 6)} ${x2} ${r1(by + 16)}`;
+      if (c) {
+        const g = mk('g', {}, c.back);
+        const mx = (ax + bx) / 2, my = (ay + by) / 2;
+        mk('line', { x1: r1(mx - 10), y1: r1(my + 22), x2: r1(mx + 5), y2: r1(my - 2), class: 'bd-stick' }, g);
+        mk('line', { x1: r1(mx + 10), y1: r1(my + 22), x2: r1(mx - 5), y2: r1(my - 2), class: 'bd-stick' }, g);
+        bPole(g, ax, ay, bx, by, 10);
+        bCut(g, bx, by, deg(bx - ax, by - ay), 10);
+        mk('line', { x1: r1(mx - 4), y1: r1(my + 3), x2: r1(mx + 4), y2: r1(my + 5), class: 'bd-tie' }, g);
+        bLeaf(g, ax + dir * 4, ay - 3, dir < 0 ? -115 : -65);
+      }
+      return { cmds, y: by + 16 };
+    },
+    // 2. Лесенка: короткие колена ступеньками, чай перескакивает с одного на следующее
+    2(x1, y, x2, c) {
+      const dir = Math.sign(x2 - x1), dx = Math.abs(x2 - x1), n = Math.max(dx < 40 ? 1 : 2, Math.round(dx / 36)), L = dx / n, k = 0.26;
+      let cx = x1, cy = y + 4, cmds = `L ${cx} ${r1(cy)}`;
+      const g = c && mk('g', {}, c.back);
+      for (let i = 0; i < n; i++) {
+        const run = L * 0.68, ex = cx + dir * run, ey = cy + k * run;
+        const nx = cx + dir * L, ny = ey + 12;
+        cmds += ` L ${r1(ex)} ${r1(ey)} C ${r1(ex + dir * (L - run) * 0.8)} ${r1(ey + 1.5)} ${r1(nx)} ${r1(ny - 7)} ${r1(nx)} ${r1(ny)}`;
+        if (g) {
+          const tail = tailRoom(c, cx, dir, 8), sx = cx - dir * tail, sy = cy - k * tail;
+          bPole(g, sx, sy, ex + dir * 2, ey + k * 2, 8);
+          bCut(g, ex + dir * 2, ey + k * 2, deg(dir, k), 8);
+          mk('line', { x1: r1(sx + dir * 3), y1: r1(sy - 4), x2: r1(sx + dir * 3), y2: r1(sy + 5), class: 'bd-tie' }, g);
+          if (i % 2 === 0) bLeaf(g, sx, sy - 2, dir < 0 ? -110 : -70, 0.55);
+        }
+        cx = nx; cy = ny;
+      }
+      return { cmds, y: cy };
+    },
+    // 3. Труба (какэи): чай уходит в бамбуковую чашку, бежит внутри закрытой трубы и льётся из среза
+    3(x1, y, x2, c) {
+      const dir = Math.sign(x2 - x1), k = 0.34, cw = 15;
+      const cupT = y + 3, cupB = y + 24, ay = cupB - 6;
+      const bx = x2 - dir * 7, by = ay + k * Math.abs(bx - x1);
+      const cmds = `L ${x1} ${r1(ay)} L ${r1(bx)} ${r1(by)} C ${r1(bx + dir * 4)} ${r1(by + 1)} ${x2} ${r1(by + 6)} ${x2} ${r1(by + 16)}`;
+      if (c) {
+        c.hidden.push([cupT + 2, by + 1]);
+        const g = mk('g', {}, c.front);
+        const mx = (x1 + bx) / 2, my = (ay + by) / 2;
+        mk('line', { x1: r1(mx), y1: r1(my), x2: r1(mx), y2: r1(my + 22), class: 'bd-stick' }, g);
+        bPole(g, x1, ay, bx, by, 9, false);
+        bCut(g, bx, by, deg(bx - x1, by - ay), 9);
+        mk('rect', { x: r1(x1 - cw / 2), y: r1(cupT), width: cw, height: r1(cupB - cupT + 3), rx: 3, class: 'bd-cup' }, g);
+        mk('line', { x1: r1(x1 - cw / 2), y1: r1(cupT + 13), x2: r1(x1 + cw / 2), y2: r1(cupT + 13), class: 'bd-node' }, g);
+        mk('ellipse', { cx: x1, cy: r1(cupT), rx: cw / 2, ry: 2.4, class: 'bd-cut' }, g);
+        mk('ellipse', { cx: x1, cy: r1(cupT + 0.6), rx: cw / 2 - 2, ry: 1.4, class: 'bd-tea', 'clip-path': 'url(#flowReveal)' }, g);
+        bLeaf(g, x1 + dir * cw / 2, cupT + 8, dir < 0 ? -80 : -100, 0.55);
+      }
+      return { cmds, y: by + 16 };
+    },
+    // 4. Отбойники: тонкие палочки на колышках; струя бьёт в палочку, скользит по ней и летит дальше дугой
+    4(x1, y, x2, c) {
+      const dir = Math.sign(x2 - x1), dx = Math.abs(x2 - x1), m = dx > 80 ? 2 : 1, part = dx / m, k = 0.42;
+      let cx = x1, cy = y + 4, cmds = `L ${cx} ${r1(cy)}`;
+      const g = c && mk('g', {}, c.back);
+      for (let i = 0; i < m; i++) {
+        const slide = part * 0.4, ex = cx + dir * slide, ey = cy + k * slide;
+        const tx = cx + dir * part, qy = ey + k * (part - slide), ty = qy + 14;
+        // дуга полёта: вылетает вдоль палочки, к концу падает отвесно
+        cmds += ` L ${r1(ex)} ${r1(ey)} Q ${r1(tx)} ${r1(qy)} ${r1(tx)} ${r1(ty)}`;
+        if (g) {
+          const tail = tailRoom(c, cx, dir, 10), o = 4; // палочка чуть ниже струи: чай скользит по ней сверху
+          const ax = cx - dir * tail, ay = cy - k * tail + o, bx = ex + dir * 5, by = ey + k * 5 + o;
+          mk('line', { x1: r1((ax + bx) / 2), y1: r1((ay + by) / 2), x2: r1((ax + bx) / 2), y2: r1((ay + by) / 2 + 16), class: 'bd-stick' }, g);
+          mk('line', { x1: r1(ax), y1: r1(ay), x2: r1(bx), y2: r1(by), class: 'bd-rod-edge' }, g); // тёмный край — чтобы палочка не сливалась с чаем
+          bPole(g, ax, ay, bx, by, 6, false);
+          mk('circle', { cx: r1((ax + bx) / 2), cy: r1((ay + by) / 2), r: 1.8, class: 'bd-peg' }, g);
+          // брызги в месте удара
+          [[-5, -3], [5, -6], [-1, -8]].forEach(([ddx, ddy]) =>
+            mk('circle', { cx: r1(cx - dir * ddx), cy: r1(cy + ddy), r: 1.2, class: 'flow-drop' }, c.liquid));
+        }
+        cx = tx; cy = ty;
+        if (i < m - 1) { cy += 6; cmds += ` L ${r1(cx)} ${r1(cy)}`; }
+      }
+      return { cmds, y: cy };
+    },
+  };
+
   function xAt(h) {
+    for (const [a, b] of S.hidden) if (h >= a && h <= b) return null;
     for (const s of S.samples) {
       if (h < s.y0 || h > s.y1) continue;
       for (const [x, y] of s.pts) if (y >= h) return x;
@@ -292,7 +623,7 @@
 
     const [dBowl, dShishi] = S.dwells;
     S.bowl.level(ease(dBowl.t));
-    S.bowl.spill(clamp((h - dBowl.y) / 30));
+    S.bowl.spill(Math.max(0, h - dBowl.y));
     S.shishi.update(dShishi.t, h > dShishi.y);
     if (S.scenes.buddha) S.scenes.buddha.el.classList.toggle('is-wet', h > S.scenes.buddha.y + 2);
     if (S.scenes.stone) S.scenes.stone.el.classList.toggle('is-wet', h > S.scenes.stone.y + 2);
@@ -302,6 +633,13 @@
     const x = (!reduce && !inDwell && t2 > 0 && h < S.end - 1) ? xAt(h) : null;
     if (x === null) S.drop.setAttribute('opacity', 0);
     else { S.drop.setAttribute('cx', x.toFixed(1)); S.drop.setAttribute('cy', h.toFixed(1)); S.drop.setAttribute('opacity', 1); }
+
+    // Анимации вдали от экрана — на паузу
+    const lo = s - 400, hi = s + vh + 400;
+    for (const c of S.cull) {
+      const off = c.y1 < lo || c.y0 > hi;
+      if (off !== c.off) { c.off = off; c.el.classList.toggle('flow-off', off); }
+    }
 
     if (vCur !== target) kick();
   }
@@ -354,9 +692,9 @@
     return { g, steam };
   }
 
-  // Статуэтка сидящего Будды (бронза). Размер 120×132, верх головы — (60, 9)
-  function drawBuddha(parent, x, y) {
-    const g = mk('g', { transform: `translate(${x} ${y})`, class: 'buddha' }, parent);
+  // Статуэтка сидящего Будды (бронза). Размер 120×132, верх головы — (60, 9); s — масштаб
+  function drawBuddha(parent, x, y, s = 1) {
+    const g = mk('g', { transform: `translate(${r1(x)} ${r1(y)})` + (s !== 1 ? ` scale(${s})` : ''), class: 'buddha' }, parent);
     mk('circle', { cx: 60, cy: 30, r: 30, fill: 'url(#halo)' }, g);
     mk('path', { d: 'M 8 116 Q 14 104 24 114 Q 32 102 42 114 Q 51 102 60 114 Q 69 102 78 114 Q 88 102 96 114 Q 106 104 112 116 L 108 126 L 12 126 Z', fill: 'url(#bronze)', stroke: '#5a3c1a', 'stroke-width': 0.8 }, g);
     mk('rect', { x: 18, y: 124, width: 84, height: 8, rx: 2, fill: '#6a4720' }, g);
@@ -392,13 +730,17 @@
   }
 
   // Фарфоровая пиала в стиле чайника (110×68): белая, кобальтовая роспись, золотой ободок.
-  // Верх края — y 0, центр края — y 12, низ ножки — y 68. Чай поднимается к краю, потом переливается.
-  function drawBowl(back, front, bx, by, defs, stream) {
+  // Верх края — y 0, центр края — y 12, низ ножки — y 68. Чай поднимается к краю, потом:
+  //   компьютер — переливается по передней стенке;
+  //   телефон (s — масштаб) — пиала наклоняется вправо на ножке и выливает чай через правый край.
+  function drawBowl(back, front, bx, by, defs, stream, s = 0) {
+    const tilt = s > 0;
+    const pos = `translate(${r1(bx)} ${r1(by)})` + (tilt ? ` scale(${s})` : '');
     // Внутренняя стенка (видна в чаше над поверхностью чая)
-    const b = mk('g', { transform: `translate(${bx} ${by})` }, back);
-    mk('ellipse', { cx: 55, cy: 12, rx: 52, ry: 11, fill: 'url(#bowlInner)' }, b);
+    const bi = mk('g', {}, mk('g', { transform: pos }, back));
+    mk('ellipse', { cx: 55, cy: 12, rx: 52, ry: 11, fill: 'url(#bowlInner)' }, bi);
 
-    const g = mk('g', { transform: `translate(${bx} ${by})` }, front);
+    const g = mk('g', {}, mk('g', { transform: pos }, front));
     // Поверхность чая — только внутри края
     const clip = mk('clipPath', { id: 'bowlIn' }, defs);
     mk('ellipse', { cx: 55, cy: 12, rx: 50, ry: 10 }, clip);
@@ -426,27 +768,56 @@
     // Золотой ободок
     mk('ellipse', { cx: 55, cy: 12, rx: 52, ry: 11, fill: 'none', stroke: 'url(#gold)', 'stroke-width': 1.8 }, g);
 
-    // Перелив: ручейки с переднего края по стенке к ножке
-    const spillClip = mk('clipPath', { id: 'spillReveal' }, defs);
-    const spillRect = mk('rect', { x: -10, y: 0, width: 130, height: 0 }, spillClip);
-    const sg = mk('g', { 'clip-path': 'url(#spillReveal)' }, g);
-    stream('M 38 22 C 36 34 40 48 47 57 C 49 61 52 66 55 70', 'smooth', 2.4, sg, false);
-    stream('M 72 22 C 74 34 70 48 63 57 C 61 61 58 66 55 70', 'smooth', 2.4, sg, false);
+    // Перелив (компьютер): ручейки с переднего края по стенке к ножке
+    let spillRect = null;
+    if (!tilt) {
+      const spillClip = mk('clipPath', { id: 'spillReveal' }, defs);
+      spillRect = mk('rect', { x: -10, y: 0, width: 130, height: 0 }, spillClip);
+      const sg = mk('g', { 'clip-path': 'url(#spillReveal)' }, g);
+      stream('M 38 22 C 36 34 40 48 47 57 C 49 61 52 66 55 70', 'smooth', 2.4, sg, false);
+      stream('M 72 22 C 74 34 70 48 63 57 C 61 61 58 66 55 70', 'smooth', 2.4, sg, false);
+    }
 
+    let lvl = 0, ang = 0;
+    function paint() {
+      const l = lvl, cy = 12 + (1 - l) * 9;
+      // поверхность чая остаётся горизонтальной, даже когда пиала наклонена
+      const flat = ang ? `rotate(${(-ang).toFixed(2)} 55 ${cy.toFixed(1)}) ` : '';
+      tea.setAttribute('cy', cy.toFixed(1));
+      tea.setAttribute('rx', (26 + 24 * l).toFixed(1));
+      tea.setAttribute('ry', (4.5 + 5.5 * l).toFixed(1));
+      tea.setAttribute('opacity', l > 0.02 ? 1 : 0);
+      tea.setAttribute('transform', flat);
+      shine.setAttribute('cy', (cy - 2 * l).toFixed(1));
+      shine.setAttribute('opacity', (l * 0.6).toFixed(2));
+      shine.setAttribute('transform', flat);
+      leaves.setAttribute('transform', `${flat}translate(0 ${cy.toFixed(1)})`);
+      leaves.setAttribute('opacity', clamp((l - 0.3) / 0.4).toFixed(2));
+    }
     return {
-      level(l) {
-        const cy = 12 + (1 - l) * 9;
-        tea.setAttribute('cy', cy.toFixed(1));
-        tea.setAttribute('rx', (26 + 24 * l).toFixed(1));
-        tea.setAttribute('ry', (4.5 + 5.5 * l).toFixed(1));
-        tea.setAttribute('opacity', l > 0.02 ? 1 : 0);
-        shine.setAttribute('cy', (cy - 2 * l).toFixed(1));
-        shine.setAttribute('opacity', (l * 0.6).toFixed(2));
-        leaves.setAttribute('transform', `translate(0 ${cy.toFixed(1)})`);
-        leaves.setAttribute('opacity', clamp((l - 0.3) / 0.4).toFixed(2));
+      level(l) { if (l !== lvl) { lvl = l; paint(); } },
+      // px — насколько струя ушла ниже поверхности чая (после наполнения)
+      spill(px) {
+        if (!tilt) { spillRect.setAttribute('height', (clamp(px / 30) * 72).toFixed(1)); return; }
+        const a = BOWL_TIP * ease(clamp(px / 14));
+        if (a === ang) return;
+        ang = a;
+        const t = a ? `rotate(${a.toFixed(2)} 70 66)` : ''; // поворот вокруг правого края ножки
+        bi.setAttribute('transform', t);
+        g.setAttribute('transform', t);
+        paint();
       },
-      spill(t) { spillRect.setAttribute('height', (t * 72).toFixed(1)); },
     };
+  }
+  const BOWL_TIP = 32; // на сколько градусов наклоняется пиала на телефоне
+
+  // Иероглиф 茶, написанный чаем; s — масштаб
+  function drawCha(parent, gx, top, s = 1) {
+    const cg = mk('g', { transform: `translate(${r1(gx)} ${r1(top)})` + (s !== 1 ? ` scale(${s})` : '') }, parent);
+    CHA.forEach(d => {
+      mk('path', { d, class: 'flow-brush-edge' }, cg);
+      mk('path', { d, class: 'flow-brush' }, cg);
+    });
   }
 
   // Иероглиф 茶 («чай»), 110×120: струя попадает в середину верхней черты
@@ -466,8 +837,9 @@
   // Ось — в точке (px, py). Открытый срезанный конец слева: в покое он поднят (поворот +18°)
   // и принимает струю; наполнившись, трубка опрокидывается (−28°), выливает чай,
   // возвращается и стучит закрытым концом о камень справа.
-  function drawShishi(parent, px, py) {
-    const g = mk('g', { transform: `translate(${px} ${py})`, class: 'shishi' }, parent);
+  // s — масштаб; mirror — зеркально (открытый конец справа), так стоит на телефоне.
+  function drawShishi(parent, px, py, s = 1, mirror = false) {
+    const g = mk('g', { transform: `translate(${r1(px)} ${r1(py)})` + (s !== 1 || mirror ? ` scale(${mirror ? -s : s} ${s})` : ''), class: 'shishi' }, parent);
     mk('ellipse', { cx: 2, cy: 49, rx: 46, ry: 5, fill: 'rgba(60, 45, 30, .22)' }, g);       // тень на земле
     mk('ellipse', { cx: 30, cy: 23.5, rx: 13, ry: 6.5, fill: 'url(#stone)' }, g);            // камень для стука (под закрытым концом)
     mk('ellipse', { cx: -22, cy: 46, rx: 7, ry: 3.5, fill: '#7a6d63' }, g);                  // галька
@@ -575,13 +947,20 @@
     try { build(); layer.style.display = ''; }
     catch (e) { S = null; layer.style.display = 'none'; console.warn('Струя чая отключена:', e); }
   }
-  let timer;
+  let timer, lastW = 0, lastH = 0;
   // После построения сразу рисуем первый кадр — чайник встаёт на место, не дожидаясь анимации
   const rebuild = () => { clearTimeout(timer); timer = setTimeout(() => { safeBuild(); frame(); }, 150); };
   safeBuild();
   frame();
   addEventListener('scroll', kick, { passive: true });
-  addEventListener('resize', rebuild);
+  // На iPhone при прокрутке прячется и снова появляется адресная строка — браузер считает это
+  // изменением размера окна. Ширина и длина страницы при этом те же, перестраивать рисунок незачем
+  // (иначе струя на миг пропадает и дёргается) — достаточно пересчитать кадр.
+  addEventListener('resize', () => {
+    const de = document.documentElement;
+    if (de.clientWidth === lastW && de.scrollHeight === lastH) kick();
+    else rebuild();
+  });
   addEventListener('load', rebuild);
   if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(document.body); // фото догрузились, сменился язык
 })();

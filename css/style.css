@@ -61,7 +61,7 @@ p { margin: 0 0 1em; }
 }
 .nav.is-solid {
   background: rgba(18, 12, 10, .92);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   padding-block: 12px;
   box-shadow: 0 1px 0 rgba(255, 255, 255, .06);
 }
@@ -699,7 +699,7 @@ html.fx-built body::after { display: none; }
 
 /* 2. Ширма: створки чёрного лака в золотой раме, роспись идёт через все створки */
 .fx-screen {
-  position: absolute; top: 0; height: 100%; backface-visibility: hidden;
+  position: absolute; top: 0; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden;
   background-repeat: no-repeat; /* роспись (одна из 10) и фон задаёт js/fx.js из js/fx-art.js */
   box-shadow: inset 0 0 0 3px #c9a15a, inset 0 0 0 7px #1a0d08, inset 0 0 0 8px rgba(201, 161, 90, .5), 2px 0 10px rgba(0, 0, 0, .5);
 }
@@ -1152,7 +1152,7 @@ html.fx-2 body::after {
 .ctile__name { font: 600 1.35rem var(--font-sign); text-shadow: 0 2px 10px rgba(0, 0, 0, .5); }
 .ctile__count {
   font: 700 .75rem var(--font-body); padding: 2px 9px; border-radius: 999px;
-  background: rgba(255, 255, 255, .16); backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, .16); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
 }
 .ctile[aria-pressed="true"] .ctile__count { background: var(--red); }
 
@@ -1360,17 +1360,32 @@ body.no-scroll { overflow: hidden; }
   100% { opacity: 0; transform: scale(1.25); }
 }
 
-/* Паузы для сцен струи: только на телефоне и планшете */
+/* Бамбук, переводящий струю вбок (телефон, js/flow.js — варианты 1–4) */
+.bd-pole { fill: none; stroke: #a9bf5a; stroke-linecap: round; }
+.bd-groove { stroke: #5f7a24; stroke-linecap: round; }
+.bd-node { stroke: #7f9638; stroke-width: 2; stroke-linecap: round; }
+.bd-cut { fill: #3f5418; }
+.bd-cup { fill: #b6c868; stroke: #6f8a2c; stroke-width: 1; }
+.bd-tea { fill: #93bb3b; }
+.bd-stick { stroke: #8a6a3e; stroke-width: 3; stroke-linecap: round; }
+.bd-tie { stroke: #5a4630; stroke-width: 1.6; stroke-linecap: round; }
+.bd-peg { fill: #5a4630; }
+.bd-rod-edge { stroke: #3f5418; stroke-width: 8.5; stroke-linecap: round; }
+/* тень струи на фото (вариант 6) и бледный контур знака 茶, пока его не «написал» чай */
+.flow-shadow { fill: none; stroke: rgba(0, 0, 0, .4); stroke-linecap: round; }
+.flow-brush-ghost { fill: none; stroke: rgba(201, 161, 90, .16); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+/* анимации вдали от экрана стоят на паузе — телефону не нужно без конца перерисовывать длинную картинку */
+#flow .flow-off, #flow .flow-off * { animation-play-state: paused !important; }
+
+/* Паузы для сцен струи: только на телефоне и планшете. Высоту каждой задаёт js/flow.js — ровно под сцену */
 .flow-stage { display: none; }
 @media (max-width: 1099px) {
   body.has-flow .flow-stage { display: block; }
-  /* высота = подход струи + сама сцена + место, чтобы струя успела уйти к краю, если ниже сразу текст */
-  .flow-stage[data-scene="buddha"] { height: 235px; }
-  .flow-stage[data-scene="cha"] { height: 170px; }
-  .flow-stage[data-scene="shishi"] { height: 150px; }
-  .flow-stage[data-scene="bamboo"] { height: 250px; }
-  .flow-stage[data-scene="stone"] { height: 150px; }
-  .flow-stage[data-scene="pond"] { height: 100px; }
+  /* знак 茶 стоит в самом низу «Ассортимента» — свой нижний отступ разделу не нужен */
+  body.has-flow #assortment { padding-bottom: 0; }
+  body.has-flow #about { padding-top: 32px; padding-bottom: 8px; }
+  /* то же у «Контактов»: сверху камень с паром, снизу пруд — паузы и так дают отступ */
+  body.has-flow #visit { padding-top: 16px; padding-bottom: 8px; }
 }
 
 /* Место для струи справа: на больших экранах колонка с содержимым чуть уже */
@@ -1454,6 +1469,14 @@ body.has-flow .lantern--2 { display: none; }
   .nav__toggle { width: 36px; }
 }
 @media (max-width: 760px) {
+  /* телефон: разделы плотнее, без больших пустых промежутков */
+  .section { padding: 56px 0; }
+  .section__head { margin-bottom: 32px; }
+  /* «О нас»: фото компактнее — большое горизонтальное, маленькое заходит на его угол */
+  .about__media { padding: 0 9% 13% 0; }
+  .about__media > img:first-child { aspect-ratio: 4 / 3; }
+  .about__media-small { width: 40%; aspect-ratio: 4 / 5; border-width: 5px; }
+  .about { gap: 28px; }
   .lantern--1 { left: 2%; --s: .7; }
   .lantern--2 { right: 3%; --s: .6; }
   .lantern--3 { display: none; }

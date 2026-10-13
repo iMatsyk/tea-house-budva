@@ -217,10 +217,18 @@
         layer.appendChild(el);
       }
     };
+    let lastW = 0, lastH = 0;
+    const measure = () => { lastW = document.documentElement.clientWidth; lastH = document.documentElement.scrollHeight; };
     build();
+    measure();
     let t;
-    const rebuild = () => { clearTimeout(t); t = setTimeout(build, 200); };
-    addEventListener('resize', rebuild);
+    const rebuild = () => { clearTimeout(t); t = setTimeout(() => { build(); measure(); }, 200); };
+    // На iPhone при прокрутке прячется адресная строка — это тоже «resize». Если ширина и длина
+    // страницы те же, фонарики не пересоздаём (иначе они все разом перескакивают на старт)
+    addEventListener('resize', () => {
+      const de = document.documentElement;
+      if (de.clientWidth !== lastW || de.scrollHeight !== lastH) rebuild();
+    });
     addEventListener('load', rebuild);
     if ('ResizeObserver' in window) new ResizeObserver(rebuild).observe(document.body);
   }
