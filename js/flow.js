@@ -25,7 +25,7 @@
   const hero = document.querySelector('.hero');
   if (!hero) return;
 
-  const FLOW = 1; // ← выбранный вариант для телефона
+  const FLOW = 6; // ← выбранный вариант для телефона
   const askedFlow = +new URLSearchParams(location.search).get('flow');
   const VAR = [1, 2, 3, 4, 5, 6].includes(askedFlow) ? askedFlow : FLOW;
   const PERSP = VAR >= 5;
@@ -236,12 +236,15 @@
 
       // Отвесная струя. В перспективе — с «уходами» за предметы и тенью на фото
       const behind = VAR === 5 ? [CARDS, false] : VAR === 6 ? [TEXT, true] : null;
-      const near = VAR === 6 ? CARDS.filter(c => c !== '.hero .neon') : null;
+      // В варианте 6 окно «Ассортимента» и карта внизу — исключения: за ними струя уходит на задний план
+      const BACK6 = ['.moongate', '.visit__map'];
+      const near = VAR === 6 ? CARDS.filter(c => c !== '.hero .neon' && !BACK6.includes(c)) : null;
       const inAny = (list, y) => list.some(([a, b]) => y > a && y < b);
       function vline(xx, y1, y2, kind = 'smooth') {
         if (y2 - y1 < 1) return;
         if (!P) { stream(`M ${xx} ${r1(y1)} L ${xx} ${r1(y2)}`, kind); return; }
-        const gaps = spans(xx, behind[0], behind[1]);
+        let gaps = spans(xx, behind[0], behind[1]);
+        if (VAR === 6) gaps = gaps.concat(spans(xx, BACK6));
         const close = near ? spans(xx, near) : [];
         const cuts = [y1, y2];
         [...gaps, ...close].forEach(([a, b]) => { if (a > y1 && a < y2) cuts.push(a); if (b > y1 && b < y2) cuts.push(b); });
